@@ -47,11 +47,16 @@ angular.module('app.services', ['ngCookies'])
                 callback(errorResponse);
                 return;
               }
-              default:
+              case 0:
               {
                 // server probably down
                 errorResponse.error = 'No connection with server';
                 errorResponse.status = 0;
+              }
+              default:
+              {
+                errorResponse.error = 'Error - status : ' + status + ' ';
+                errorResponse.status = status;
                 callback(errorResponse);
                 return;
               }
@@ -87,11 +92,16 @@ angular.module('app.services', ['ngCookies'])
                 callback(errorResponse);
                 return;
               }
-              default:
+              case 0:
               {
                 // server probably down
                 errorResponse.error = 'No connection with server';
                 errorResponse.status = 0;
+              }
+              default:
+              {
+                errorResponse.error = 'Error - status : ' + status + ' ';
+                errorResponse.status = status;
                 callback(errorResponse);
                 return;
               }
@@ -141,11 +151,16 @@ angular.module('app.services', ['ngCookies'])
                 callback(errorResponse);
                 return;
               }
-              default:
+              case 0:
               {
                 // server probably down
                 errorResponse.error = 'No connection with server';
                 errorResponse.status = 0;
+              }
+              default:
+              {
+                errorResponse.error = 'Error - status : ' + status + ' ';
+                errorResponse.status = status;
                 callback(errorResponse);
                 return;
               }
@@ -189,11 +204,16 @@ angular.module('app.services', ['ngCookies'])
                 callback(errorResponse);
                 return;
               }
-              default:
+              case 0:
               {
                 // server probably down
                 errorResponse.error = 'No connection with server';
                 errorResponse.status = 0;
+              }
+              default:
+              {
+                errorResponse.error = 'Error - status : ' + status + ' ';
+                errorResponse.status = status;
                 callback(errorResponse);
                 return;
               }
@@ -249,11 +269,16 @@ angular.module('app.services', ['ngCookies'])
                   callback(errorResponse);
                   return;
                 }
-                default:
+                case 0:
                 {
                   // server probably down
                   errorResponse.error = 'No connection with server';
                   errorResponse.status = 0;
+                }
+                default:
+                {
+                  errorResponse.error = 'Error - status : ' + status + ' ';
+                  errorResponse.status = status;
                   callback(errorResponse);
                   return;
                 }
@@ -280,7 +305,7 @@ angular.module('app.services', ['ngCookies'])
           $http.get('http://spring-rest-template.duckdns.org/api/user', {})
             .success(function (response) {
               callback(response);
-            }).error(function(error, status) {
+            }).error(function(error, status, headers) {
             errorResponse = {
               error: '',
               status: 0
@@ -295,16 +320,22 @@ angular.module('app.services', ['ngCookies'])
               }
               case 401:
               {
-                errorResponse.error = "Not authorized, please make sure your email is activated.";
+                var errorHeader = headers("error");
+                errorResponse.error = (errorHeader)  ? errorHeader : "Wrong credentials.";
                 errorResponse.status = 401;
                 callback(errorResponse);
                 return;
               }
-              default:
+              case 0:
               {
                 // server probably down
                 errorResponse.error = 'No connection with server';
                 errorResponse.status = 0;
+              }
+              default:
+              {
+                errorResponse.error = 'Error - status : ' + status + ' ';
+                errorResponse.status = status;
                 callback(errorResponse);
                 return;
               }

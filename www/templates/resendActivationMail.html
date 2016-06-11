@@ -3,7 +3,7 @@
         <form ng-controller="resendActivationMailCtrl" ng-submit="resendActivationMail()" class="list">
           <label class="item item-input">
               <span class="input-label">Email</span>
-              <input type="text" id="email" ng-model="email" placeholder="">
+              <input type="email" id="email" ng-model="email" placeholder="">
           </label>
 
           <div ng-show="error" class="assertive">{{error}}</div>
