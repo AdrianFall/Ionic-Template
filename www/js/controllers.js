@@ -4,7 +4,7 @@ angular.module('app.controllers', [])
 
 })
 
-.controller('loginCtrl', function($scope, $state, $rootScope, AuthenticationService, $ionicLoading) {
+.controller('loginCtrl', function($scope, $state, $rootScope, AuthenticationService, FacebookService, $ionicLoading, $window, __env) {
   // reset login status
   AuthenticationService.ClearCredentials();
 
@@ -28,6 +28,38 @@ angular.module('app.controllers', [])
     });
 
   }
+
+  $scope.loginFacebook = function() {
+    // alert('loginFacebook ' + JSON.stringify(__env))
+    // alert('FB ' + JSON.stringify(FB));
+    FacebookService.login().then(
+      function(succ) { $scope.loginFacebookSuccess(succ) },
+      function(err) { $scope.loginFacebookFailure(err) }
+    );
+  }
+
+  $scope.loginFacebookFailure = function(err) {
+    console.log('Error when logging in through facebook : ' + err)
+  }
+
+  $scope.loginFacebookSuccess = function(accessToken) {
+    console.log('Logged in through facebook access token : ' + accessToken)
+    AuthenticationService.exchangeFacebookAccessTokenForAuth(accessToken).then(
+      function(succ) { $scope.exchangeFacebookAccessTokenForAuthSuccess(succ) },
+      function (err) { $scope.exchangeFacebookAccessTokenForAuthFailure(err) }
+    )
+  }
+
+  $scope.exchangeFacebookAccessTokenForAuthSuccess = function(succ) {
+    console.log('exchangeFacebookAccessTokenForAuthSuccess : ' + succ);
+    $ionicLoading.hide();
+  }
+
+  $scope.exchangeFacebookAccessTokenForAuthFailure = function(err) {
+    console.log('exchangeFacebookAccessTokenForAuthFailure : ' + err);
+    $ionicLoading.hide();
+  }
+
 })
 
 .controller('registerCtrl', function($scope, $state, $rootScope, RegistrationService, $ionicLoading) {

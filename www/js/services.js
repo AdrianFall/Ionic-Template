@@ -1,3 +1,4 @@
+
 angular.module('app.services', ['ngCookies'])
 
   .factory('BlankFactory',
@@ -11,16 +12,88 @@ angular.module('app.services', ['ngCookies'])
     ]
   )
 
+
+  .factory('FacebookService',
+    ['$q', '$http', '$rootScope',
+      function($q, $http, $rootScope, $scope) {
+        var service = {};
+
+        /* Returns the accessToken */
+        service.login = function() {
+          console.log('logging in to facebook')
+          var defer = $q.defer();
+
+          FB.getLoginStatus(function(response) {
+
+            if (response.status && response.status == 'connected') {
+
+              if (response.authResponse.accessToken)
+                defer.resolve(response.authResponse.accessToken);
+              else
+                defer.reject("Facebook didn't provide the access token");
+            } else {
+              FB.login(function(response) {
+                console.log('Welcome!  Fetching your information.... ');
+                FB.api('/me', function(response) {
+                  console.log('Good to see you, ' + response.name + '.');
+
+                });
+
+                if (response.authResponse && response.authResponse.accessToken) {
+                  $http({
+                    method: 'POST',
+                    url: url,
+                    data: $.param({input_token: response.authResponse.accessToken}),
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                  }).success(function () {
+                    alert('success')
+                  }).error(function () {
+                    alert('error')
+                  });
+                  defer.resolve(response.authResponse.accessToken);
+                } else
+                  defer.reject("Facebook didn't provide the access token");
+
+              }, {scope: 'email'})
+            }
+
+            /*if (response.accessToken && response.accessToken.length > 5) {
+              accessToken = response.accessToken;
+              defer.resolve();
+            } else {
+              FB.login(function(response) {
+                console.log('Welcome!  Fetching your information.... ');
+                FB.api('/me', function(response) {
+                  console.log('Good to see you, ' + response.name + '.');
+                  defer.resolve();
+                });
+
+              })
+            }*/
+          });
+
+
+
+          return defer.promise;
+        }
+
+        return service;
+      }
+
+    ]
+  )
+
+
   .factory('AccountActivationService',
-    ['$http', '$rootScope',
-      function($http, $rootScope, $scope) {
+    ['$http', '$rootScope', '__env',
+      function($http, $rootScope, __env, $scope) {
         var service = {};
 
         service.ResendActivationMail = function(email, callback) {
           var credentials = {
             email : email
           }
-          $http.post('http://spring-rest-template.duckdns.org/resendConfirmationEmail', credentials)
+          $http.post(__env.apiUrl + __env.baseUrl + 'resendConfirmationEmail', credentials)
             .success(function (response) {
               callback(response);
             }).error(function (error, status) {
@@ -65,7 +138,7 @@ angular.module('app.services', ['ngCookies'])
         }
 
         service.ActivateAccount = function(token, callback) {
-          $http.get('http://spring-rest-template.duckdns.org/registrationConfirm', {
+          $http.get(__env.apiUrl + __env.baseUrl + 'registrationConfirm', {
             params: {token: token}
 
           }).success(function (response) {
@@ -117,8 +190,8 @@ angular.module('app.services', ['ngCookies'])
   )
 
   .factory('ResetPasswordService',
-    ['$http', '$rootScope',
-      function($http, $rootScope, $scope) {
+    ['$http', '$rootScope', '__env',
+      function($http, $rootScope, __env, $scope) {
         var service = {};
 
         service.RequestResetPassword = function(email, callback) {
@@ -126,7 +199,7 @@ angular.module('app.services', ['ngCookies'])
             email : email
           }
 
-          $http.post('http://spring-rest-template.duckdns.org/requestResetPassword', credentials)
+          $http.post(__env.apiUrl + __env.baseUrl + 'requestResetPassword', credentials)
             .success(function (response) {
               callback(response);
             }).error(function (error, status) {
@@ -175,7 +248,7 @@ angular.module('app.services', ['ngCookies'])
             confirmPassword: confirmPassword
           }
 
-          $http.post('http://spring-rest-template.duckdns.org/resetPassword', credentials)
+          $http.post(__env.apiUrl + __env.baseUrl + 'resetPassword', credentials)
             .success(function (response) {
               callback(response);
             }).error(function (error, status) {
@@ -230,8 +303,8 @@ angular.module('app.services', ['ngCookies'])
 
 
   .factory('RegistrationService',
-    ['$http', '$rootScope',
-      function($http, $rootScope, $scope) {
+    ['$http', '$rootScope', '__env',
+      function($http, $rootScope, __env,  $scope) {
         var service = {};
 
         service.Register = function(email, password, confirmPassword, callback) {
@@ -240,7 +313,7 @@ angular.module('app.services', ['ngCookies'])
             password: password,
             confirmPassword: confirmPassword
           }
-          $http.post('http://spring-rest-template.duckdns.org/register', credentials)
+          $http.post(__env.apiUrl + __env.baseUrl + 'register', credentials)
             .success(function (response) {
               callback(response);
             }).error(function(error,status) {
@@ -293,16 +366,34 @@ angular.module('app.services', ['ngCookies'])
   )
 
   .factory('AuthenticationService',
-    ['Base64', '$http', '$cookieStore', '$rootScope', '$timeout',
-      function (Base64, $http, $cookieStore, $rootScope, $scope, $timeout) {
+    ['$q', 'Base64', '$http', '$cookieStore', '$rootScope', '$timeout', '__env',
+      function ($q, Base64, $http, $cookieStore, $rootScope, $timeout, __env,$scope) {
         var service = {};
+
+        service.exchangeFacebookAccessTokenForAuth = function(accessToken) {
+          var deferred = $q.defer();
+
+          $http.get(__env.apiUrl + __env.baseUrl + 'social/facebook/login?input_token=' + accessToken)
+            .success(function (response) {
+              alert('success')
+              deferred.resolve();
+            }).error(function (error, status) {
+              alert('error')
+            deferred.reject(error);
+          })
+
+
+
+          return deferred.promise;
+        }
 
         service.Login = function (username, password, callback) {
 
           /* Use this for real authentication
            ----------------------------------------------*/
           $http.defaults.headers.common['Authorization'] = 'Basic ' + Base64.encode(username + ':' + password);
-          $http.get('http://spring-rest-template.duckdns.org/api/user', {})
+
+          $http.get(__env.apiUrl + __env.baseUrl + 'api/user', {})
             .success(function (response) {
               callback(response);
             }).error(function(error, status, headers) {
@@ -310,6 +401,7 @@ angular.module('app.services', ['ngCookies'])
               error: '',
               status: 0
             };
+
             switch (status) {
               case 404:
               {

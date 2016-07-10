@@ -13,10 +13,11 @@
             </ion-list>
             <div ng-show="error" class="assertive">{{error}}</div>
             <div class="spacer" style="height: 40px;"></div>
-            <button id="login-button3" class="button button-stable  button-block">Log in</button>
+            <button id="login-button3" class="button button-stable  button-block" scope="email" >Log in</button>
             <a ui-sref="tabsController.register" id="login-button4" class="button button-positive  button-block button-clear">Or create an account</a>
             <div class="spacer" style="height: 40px;"></div>
         </form>
+      <button ng-click="loginFacebook()" id="login-facebook" class="button button-stable  button-block">Facebook Log in</button>
         <a ui-sref="tabsController.requestResetPassword" id="login-button15" class="button button-positive  button-block button-clear">Lost password?</a>
     </ion-content>
 </ion-view>
