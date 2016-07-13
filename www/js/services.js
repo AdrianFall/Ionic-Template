@@ -373,7 +373,7 @@ angular.module('app.services', ['ngCookies'])
         service.exchangeFacebookAccessTokenForAuth = function(accessToken) {
           var deferred = $q.defer();
 
-          $http.get(__env.apiUrl + __env.baseUrl + 'social/facebook/login?input_token=' + accessToken)
+          $http.post(__env.apiUrl + __env.baseUrl + 'social/facebook/login', {}, {headers: {input_token: accessToken}})
             .success(function (response) {
               alert('success')
               deferred.resolve();
